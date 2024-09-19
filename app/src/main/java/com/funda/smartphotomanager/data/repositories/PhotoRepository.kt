@@ -18,6 +18,7 @@ class PhotoRepository @Inject constructor(
 
     suspend fun getPhotosFromGallery(): List<PhotoModel> {
         Log.d(TAG, "getPhotosFromGallery: Galeriden fotoğraflar çekiliyor.")
+
         return withContext(Dispatchers.IO) {
             val photoList = mutableListOf<PhotoModel>()
 
@@ -39,22 +40,19 @@ class PhotoRepository @Inject constructor(
 
             query?.use { cursor ->
                 val idColumn = cursor.getColumnIndexOrThrow(MediaStore.Images.Media._ID)
+                val nameColumn = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DISPLAY_NAME)
+                val dateColumn = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATE_TAKEN)
 
                 while (cursor.moveToNext()) {
                     val id = cursor.getLong(idColumn)
+                    val name = cursor.getString(nameColumn) ?: "Unknown"
+                    val date = cursor.getLong(dateColumn)
                     val contentUri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI.buildUpon()
                         .appendPath(id.toString()).build()
 
-                    Log.d(TAG, "Photo found: $contentUri")
-                    val photo = PhotoModel(id, contentUri.toString())
+                    val photo = PhotoModel(id, contentUri.toString(), name, date)
                     photoList.add(photo)
                 }
-            }
-
-            if (photoList.isNotEmpty()) {
-                Log.d(TAG, "getPhotosFromGallery: ${photoList.size} fotoğraf bulundu.")
-            } else {
-                Log.d(TAG, "getPhotosFromGallery: Fotoğraf bulunamadı.")
             }
 
             photoList

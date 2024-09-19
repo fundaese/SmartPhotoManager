@@ -18,16 +18,34 @@ class HomeViewModel @Inject constructor(
 
     private val TAG = "HomeViewModel"
 
+    private var allPhotos = listOf<PhotoModel>()
+
+    // Load Photo
     fun loadPhotos() {
         Log.d(TAG, "loadPhotos: Fotoğraflar yüklenmeye başlıyor.")
+
         viewModelScope.launch {
             val photoList = repository.getPhotosFromGallery()
-            if (photoList.isNotEmpty()) {
-                Log.d(TAG, "loadPhotos: ${photoList.size} fotoğraf bulundu.")
-            } else {
-                Log.d(TAG, "loadPhotos: Fotoğraf bulunamadı.")
-            }
+            allPhotos = photoList
             _photos.value = photoList
         }
+    }
+
+    // Filter by name
+    fun filterPhotosByName(query: String) {
+        val filteredPhotos = allPhotos.filter { it.name.contains(query, ignoreCase = true) }
+        _photos.value = filteredPhotos
+    }
+
+    // Filter by date
+    fun sortPhotosByDate() {
+        val sortedPhotos = allPhotos.sortedByDescending { it.date }
+        _photos.value = sortedPhotos
+    }
+
+    // Filter & Sort by name
+    fun sortPhotosByName() {
+        val sortedPhotos = allPhotos.sortedBy { it.name }
+        _photos.value = sortedPhotos
     }
 }

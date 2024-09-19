@@ -1,19 +1,20 @@
 package com.funda.smartphotomanager.ui.fragment
 
-import android.content.pm.PackageManager
 import android.os.Bundle
 import android.util.Log
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
+import android.view.*
+import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.MenuProvider
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.Lifecycle
 import androidx.recyclerview.widget.GridLayoutManager
+import com.funda.smartphotomanager.R
 import com.funda.smartphotomanager.databinding.FragmentHomeBinding
 import com.funda.smartphotomanager.ui.adapters.PhotoAdapter
 import com.funda.smartphotomanager.ui.viewmodel.HomeViewModel
+import com.funda.smartphotomanager.utils.MenuManager
+import com.funda.smartphotomanager.utils.PermissionManager
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -31,10 +32,50 @@ class HomeFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        Log.d(TAG, "onCreateView: Fragment açıldı.")
         binding = FragmentHomeBinding.inflate(inflater, container, false)
 
-        // RecyclerView & Adapter settings
+        setupRecyclerView()
+        observePhotos()
+        checkPermissions()
+
+        // MenuProvider
+        requireActivity().addMenuProvider(object : MenuProvider {
+            override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
+                menuInflater.inflate(R.menu.toolbar_menu, menu)
+                MenuManager.setupSearch(
+                    menu,
+                    R.id.action_search,
+                    "Search Photo",
+                    homeViewModel::filterPhotosByName,
+                    homeViewModel::filterPhotosByName
+                )
+            }
+
+            override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
+                return when (menuItem.itemId) {
+                    R.id.action_sort -> {
+                        Log.d(TAG, "Sort clicked")
+                        MenuManager.setupSortMenu(this@HomeFragment, R.id.action_sort,
+                            homeViewModel::sortPhotosByName,
+                            homeViewModel::sortPhotosByDate
+                        )
+                        true
+                    }
+                    else -> false
+                }
+            }
+        }, viewLifecycleOwner, Lifecycle.State.RESUMED)
+
+        return binding.root
+    }
+
+    // Binding toolbar
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        (activity as AppCompatActivity).setSupportActionBar(binding.toolbar)
+    }
+
+    private fun setupRecyclerView() {
         val layoutManager = GridLayoutManager(requireContext(), 3)
         binding.recyclerView.layoutManager = layoutManager
 
@@ -42,69 +83,38 @@ class HomeFragment : Fragment() {
             Log.d(TAG, "Photo clicked: $photo")
         }
         binding.recyclerView.adapter = adapter
+    }
 
-        // Observe photos
+    // Observe Photos
+    private fun observePhotos() {
         homeViewModel.photos.observe(viewLifecycleOwner) { photos ->
-            Log.d(TAG, "Photos observed: ${photos.size} fotoğraf yüklendi.")
             if (photos.isNullOrEmpty()) {
-                Log.d(TAG, "No photos found.")
                 binding.recyclerView.visibility = View.GONE
             } else {
-                Log.d(TAG, "Photos loaded.")
                 binding.recyclerView.visibility = View.VISIBLE
                 adapter.submitList(photos)
             }
         }
-
-        // Check permissions
-        checkPermissions()
-
-        return binding.root
     }
 
+    // Check Permissions
     private fun checkPermissions() {
-        Log.d(TAG, "checkPermissions: İzin kontrol ediliyor.")
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
-            // Android 13+
-            if (ContextCompat.checkSelfPermission(requireContext(), android.Manifest.permission.READ_MEDIA_IMAGES) != PackageManager.PERMISSION_GRANTED) {
-                Log.d(TAG, "Android 13+: İzin verilmemiş. İzin isteniyor.")
-                ActivityCompat.requestPermissions(
-                    requireActivity(),
-                    arrayOf(android.Manifest.permission.READ_MEDIA_IMAGES),
-                    REQUEST_PERMISSION_CODE
-                )
-            } else {
-                Log.d(TAG, "Android 13+: İzin verilmiş. Fotoğraflar yükleniyor.")
+            PermissionManager.checkAndRequestPermission(
+                this,
+                android.Manifest.permission.READ_MEDIA_IMAGES,
+                REQUEST_PERMISSION_CODE
+            ) {
                 homeViewModel.loadPhotos()
             }
         } else {
-            // Android 12-
-            if (ContextCompat.checkSelfPermission(requireContext(), android.Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-                Log.d(TAG, "Android 12 ve altı: İzin verilmemiş. İzin isteniyor.")
-                ActivityCompat.requestPermissions(
-                    requireActivity(),
-                    arrayOf(android.Manifest.permission.READ_EXTERNAL_STORAGE),
-                    REQUEST_PERMISSION_CODE
-                )
-            } else {
-                Log.d(TAG, "Android 12 ve altı: İzin verilmiş. Fotoğraflar yükleniyor.")
+            PermissionManager.checkAndRequestPermission(
+                this,
+                android.Manifest.permission.READ_EXTERNAL_STORAGE,
+                REQUEST_PERMISSION_CODE
+            ) {
                 homeViewModel.loadPhotos()
             }
         }
     }
-
-
-    override fun onRequestPermissionsResult(
-        requestCode: Int, permissions: Array<out String>, grantResults: IntArray
-    ) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if (requestCode == REQUEST_PERMISSION_CODE && grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-            Log.d(TAG, "İzin verildi. Fotoğraflar yükleniyor.")
-            homeViewModel.loadPhotos()
-        } else {
-            Log.i(TAG, "İzin verilmedi. Kullanıcı izni reddetti.")
-        }
-    }
-
-
 }
