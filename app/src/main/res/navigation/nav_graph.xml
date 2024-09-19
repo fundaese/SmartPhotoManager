@@ -13,10 +13,21 @@
         <action
             android:id="@+id/action_homeFragment_to_cameraFragment"
             app:destination="@id/cameraFragment" />
+        <action
+            android:id="@+id/action_homeFragment_to_fullScreenImageFragment2"
+            app:destination="@id/fullScreenImageFragment" />
     </fragment>
     <fragment
         android:id="@+id/cameraFragment"
         android:name="com.funda.smartphotomanager.ui.fragment.camera.CameraFragment"
         android:label="fragment_camera"
         tools:layout="@layout/fragment_camera" />
+    <fragment
+        android:id="@+id/fullScreenImageFragment"
+        android:name="com.funda.smartphotomanager.ui.fragment.fullscreen.FullScreenImageFragment"
+        android:label="FullScreenImageFragment">
+        <argument
+            android:name="imageUri"
+            app:argType="string" />
+    </fragment>
 </navigation>

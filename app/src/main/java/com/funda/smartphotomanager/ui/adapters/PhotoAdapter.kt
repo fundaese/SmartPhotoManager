@@ -29,13 +29,11 @@ class PhotoAdapter(private val onItemClick: (PhotoModel) -> Unit) :
         RecyclerView.ViewHolder(binding.root) {
         fun bind(photo: PhotoModel) {
             Log.d(TAG, "bind: Fotoğraf gösteriliyor - ${photo.uri}")
-            // Upload photo
             Glide.with(binding.imageView.context)
                 .load(photo.uri)
                 .error(android.R.drawable.ic_menu_report_image)
                 .into(binding.imageView)
 
-            // Click photo
             binding.imageView.setOnClickListener {
                 onItemClick(photo)
                 Log.d(TAG, "Photo clicked: ${photo.uri}")

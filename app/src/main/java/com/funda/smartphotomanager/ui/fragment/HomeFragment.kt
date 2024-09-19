@@ -8,6 +8,7 @@ import androidx.core.view.MenuProvider
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
 import com.funda.smartphotomanager.R
 import com.funda.smartphotomanager.databinding.FragmentHomeBinding
@@ -79,9 +80,12 @@ class HomeFragment : Fragment() {
         val layoutManager = GridLayoutManager(requireContext(), 3)
         binding.recyclerView.layoutManager = layoutManager
 
+        //navigate fullscreen fragment
         adapter = PhotoAdapter { photo ->
-            Log.d(TAG, "Photo clicked: $photo")
+            val action = HomeFragmentDirections.actionHomeFragmentToFullScreenImageFragment2(photo.uri)
+            findNavController().navigate(action)
         }
+
         binding.recyclerView.adapter = adapter
     }
 
