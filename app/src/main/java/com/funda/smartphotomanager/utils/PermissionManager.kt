@@ -22,4 +22,16 @@ object PermissionManager {
             )
         }
     }
+
+    fun handlePermissionResult(
+        grantResults: IntArray,
+        onPermissionGranted: () -> Unit,
+        onPermissionDenied: () -> Unit
+    ) {
+        if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            onPermissionGranted()
+        } else {
+            onPermissionDenied()
+        }
+    }
 }

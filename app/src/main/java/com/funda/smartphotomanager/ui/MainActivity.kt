@@ -13,9 +13,6 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        // Hide ActionBar
-        supportActionBar?.hide()
-
         val navHostFragment = supportFragmentManager
             .findFragmentById(R.id.nav_graph) as NavHostFragment
         val navController = navHostFragment.navController

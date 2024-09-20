@@ -2,7 +2,12 @@ package com.funda.smartphotomanager.ui.fragment
 
 import android.os.Bundle
 import android.util.Log
-import android.view.*
+import android.view.LayoutInflater
+import android.view.Menu
+import android.view.MenuInflater
+import android.view.MenuItem
+import android.view.View
+import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.MenuProvider
 import androidx.fragment.app.Fragment
@@ -56,12 +61,14 @@ class HomeFragment : Fragment() {
                 return when (menuItem.itemId) {
                     R.id.action_sort -> {
                         Log.d(TAG, "Sort clicked")
-                        MenuManager.setupSortMenu(this@HomeFragment, R.id.action_sort,
+                        MenuManager.setupSortMenu(
+                            this@HomeFragment, R.id.action_sort,
                             homeViewModel::sortPhotosByName,
                             homeViewModel::sortPhotosByDate
                         )
                         true
                     }
+
                     else -> false
                 }
             }
@@ -84,6 +91,20 @@ class HomeFragment : Fragment() {
         adapter = PhotoAdapter { photo ->
             val action = HomeFragmentDirections.actionHomeFragmentToFullScreenImageFragment2(photo.uri)
             findNavController().navigate(action)
+        }
+
+        binding.bottomNavigation.setOnItemSelectedListener { item ->
+            when (item.itemId) {
+                R.id.action_gallery -> {
+                    true
+                }
+                R.id.action_camera -> {
+                    val action = HomeFragmentDirections.actionHomeFragmentToCameraFragment()
+                    findNavController().navigate(action)
+                    true
+                }
+                else -> false
+            }
         }
 
         binding.recyclerView.adapter = adapter
@@ -120,5 +141,11 @@ class HomeFragment : Fragment() {
                 homeViewModel.loadPhotos()
             }
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        homeViewModel.loadPhotos()
+        binding.bottomNavigation.selectedItemId = R.id.action_gallery
     }
 }
