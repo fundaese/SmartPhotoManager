@@ -3,6 +3,14 @@
 Smart Photo Manager is an Android application that allows users to manage their photo gallery efficiently. It includes features like photo search, sorting, and taking new photos using the device's camera.
 
 ## Technologies
+- Kotlin: Primary language for Android development.
+- MVVM (Model-View-ViewModel): Architectural pattern for managing UI-related data in a lifecycle-conscious way.
+- Coroutines: Asynchronous programming for better performance.
+- Dagger-Hilt: Dependency injection framework to manage and inject dependencies.
+- Navigation Component: Handles in-app navigation, including passing data between fragments.
+- ViewBinding: Type-safe binding of UI components to views.
+- Glide: Image loading and caching library for efficient image display.
+- FileProvider: Allows sharing files between apps securely.
 
 ## Features
 - Browse photos from device gallery.
