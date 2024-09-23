@@ -27,7 +27,7 @@ Smart Photo Manager is an Android application that allows users to manage their 
 ## Installation
 1. Clone the repository:
    ```bash
-   git clone https://github.com/username/repository.git
+   git clone https://github.com/fundaese/SmartPhotoManager.git
 2. Open the project in Android Studio.
 3. Build and run the project on an Android device or emulator.
 
